@@ -36,6 +36,7 @@ class CNQH_Registry
 	private var sentVersion	: int;
 	private var active		: array<string>;
 	public var lastHello	: float;
+	public var announced	: bool;   // NQH_RegisterListeners has been called this session
 
 	// Registering again under the same id replaces the old listener
 	public function Register(id : name, listener : CNQH_Listener)
@@ -159,6 +160,20 @@ function NQH_Register(id : name, listener : CNQH_Listener)
 	NQH_Get().Register(id, listener);
 }
 
+// Wrap this to register your listeners: it's called once a session, when the .asi first says hello.
+//
+//   @wrapMethod
+//   function NQH_RegisterListeners()
+//   {
+//       wrappedMethod();
+//       NQH_Register('MyMod', (new CMyListener in theGame).Init());
+//   }
+//
+// You can also call NQH_Register yourself whenever you like: registering again under the same id replaces the listener.
+function NQH_RegisterListeners()
+{
+}
+
 // After changing a registered listener's watched list
 function NQH_Changed()
 {
@@ -188,7 +203,11 @@ function NQH_Hello() : int
 	var registry : CNQH_Registry = NQH_Get();
 
 	registry.lastHello = theGame.GetEngineTimeAsSeconds();
-	NQH_RegisterTests();
+	if (!registry.announced)
+	{
+		registry.announced = true;
+		NQH_RegisterListeners();
+	}
 	return NQH_ApiVersion();
 }
 
