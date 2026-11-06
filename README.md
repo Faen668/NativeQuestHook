@@ -131,6 +131,7 @@ On any other build it searches the exe for everything it needs. If any of it can
 
 - **The .asi:** CMake and Visual Studio 2022 (x64). Set `W3_GAME_DIR` to install into your game folder after each build.
 - **The scripts:** `sh tools/compile.sh` compiles them with REDkit's `wcc_lite` into `precompiled.rsblob`.
+- **A release:** `sh tools/create-release.sh [version]` builds both from the last commit and makes the installable zip in `build/release`. The version defaults to the commit's tag.
 
 The research behind it, from which functions to call to the layouts of quest blocks and threads, is summed up in the source's comments.
 
