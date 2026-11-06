@@ -18,6 +18,12 @@ void LogInit(void* module)
 	wchar_t* dot = wcsrchr(path, L'.');
 	if (dot)
 		wcscpy_s(dot, MAX_PATH - (dot - path), L".log");
+	// The last session's log is kept as NativeQuestHook.prev.log: after a crash, the next launch would write over it
+	wchar_t previous[MAX_PATH];
+	wcscpy_s(previous, path);
+	if (wchar_t* ext = wcsrchr(previous, L'.'))
+		wcscpy_s(ext, MAX_PATH - (ext - previous), L".prev.log");
+	MoveFileExW(path, previous, MOVEFILE_REPLACE_EXISTING);
 	// Shared, so the log can be read while the game runs
 	g_file = _wfsopen(path, L"w", _SH_DENYNO);
 }
