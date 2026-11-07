@@ -5,16 +5,20 @@
 #
 #   sh tools/create-release.sh [version]
 #
-# The version defaults to the tag on the current commit (v1.0.0 and 1.0.0 both work).
+# Without a version, it asks for one (v1.0.0 and 1.0.0 both work). Releases go on Nexus, not GitHub, so there are no tags.
 # It builds from the last commit, not the working folder, so uncommitted changes are never shipped,
 # and it never installs into the game. The zip goes in build/release.
 set -e
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$HERE"
 
-VERSION="${1:-$(git tag --points-at HEAD | head -n 1)}"
+VERSION="$1"
 if [ -z "$VERSION" ]; then
-	echo "No version given, and the current commit has no tag. Run: sh tools/create-release.sh 1.0.1"
+	printf "Version for this release (for example 1.1.1): "
+	read -r VERSION || true
+fi
+if [ -z "$VERSION" ]; then
+	echo "No version given. Run: sh tools/create-release.sh 1.1.1"
 	exit 1
 fi
 VERSION="v${VERSION#v}"
