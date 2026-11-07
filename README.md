@@ -25,7 +25,9 @@ The game's engine still has the quest listener REDkit's quest debugger uses. Eve
 
 ## Installing
 
-1. Install [Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader): its `dinput8.dll` goes in `bin\x64_dx12`. Mods such as Progress on the Path NG already ship it.
+Download Native Quest Hook from its Nexus page: https://www.nexusmods.com/witcher3/mods/15527
+
+1. Install [Ultimate ASI Loader](https://www.nexusmods.com/witcher3/mods/13671) (ThirteenAG's [loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader), packaged for the game by voidom1): it adds `winmm.dll` to `bin\x64_dx12`. Install only one ASI loader.
 2. Copy `NativeQuestHook.asi` into `bin\x64_dx12`.
 3. Copy `modNativeQuestHook` into `mods`.
 
