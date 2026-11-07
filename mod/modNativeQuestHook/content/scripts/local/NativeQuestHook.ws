@@ -4,7 +4,8 @@
 // Quest block events from NativeQuestHook.asi, for any mod to listen to in script.
 //
 // Extend CNQH_Listener, put the GUIDs of the quest blocks you want in watched (W3 Mod Workbench shows them),
-// and register it once with NQH_Register. Only watched blocks are sent to script, and each listener hears only its own.
+// and register it once with NQH_Register. GUIDs can be in the standard form (4b435b43-30c2-40d8-9eae-08df8d1b7df9),
+// REDkit's (4B435B43-40D830C2-DF08AE9E-F97D1B8D), in braces or without dashes, in any case. Only watched blocks are sent to script, and each listener hears only its own.
 // Without the .asi nothing is sent: a mod using this still runs, it just hears nothing. NQH_IsNativeActive says which.
 
 class CNQH_Listener
@@ -63,6 +64,7 @@ class CNQH_Registry
 	public function WatchList() : string
 	{
 		var text	: string;
+		var guid	: string;
 		var Idx		: int;
 		var i		: int;
 
@@ -75,8 +77,9 @@ class CNQH_Registry
 				{
 					text += ",";
 				}
-				sent.PushBack(StrLower(listeners[Idx].watched[i]));
-				text += StrLower(listeners[Idx].watched[i]);
+				guid = NQH_NormaliseGuid(listeners[Idx].watched[i]);
+				sent.PushBack(guid);
+				text += guid;
 			}
 		}
 		sentVersion = version;
@@ -111,7 +114,7 @@ class CNQH_Registry
 		{
 			for (i = 0; i < listeners[Idx].watched.Size(); i += 1)
 			{
-				if (StrLower(listeners[Idx].watched[i]) != guid)
+				if (NQH_NormaliseGuid(listeners[Idx].watched[i]) != guid)
 				{
 					continue;
 				}
@@ -128,7 +131,7 @@ class CNQH_Registry
 
 	public function IsActive(guid : string) : bool
 	{
-		return active.Contains(StrLower(guid));
+		return active.Contains(NQH_NormaliseGuid(guid));
 	}
 }
 
@@ -192,6 +195,42 @@ function NQH_IsNativeActive() : bool
 	var hello : float = NQH_Get().lastHello;
 
 	return hello > 0 && theGame.GetEngineTimeAsSeconds() - hello < 5.0;
+}
+
+// A block's GUID in the standard lower-case form the .asi uses, from any of the forms watched takes:
+// the standard 8-4-4-4-12 form, REDkit's 8-8-8-8 (the same 16 bytes as four little-endian uint32s),
+// either in braces, or 32 hex digits without dashes (read as the standard form). Anything else comes back just lower-cased.
+function NQH_NormaliseGuid(guid : string) : string
+{
+	var g	: string;
+	var b	: string;
+	var c	: string;
+	var d	: string;
+
+	g = StrLower(guid);
+	g = StrReplaceAll(g, "{", "");
+	g = StrReplaceAll(g, "}", "");
+	g = StrReplaceAll(g, " ", "");
+
+	if (StrLen(g) == 35 && StrMid(g, 8, 1) == "-" && StrMid(g, 17, 1) == "-" && StrMid(g, 26, 1) == "-")
+	{
+		// REDkit: groups 2-4 are bytes 4-7, 8-11 and 12-15 as little-endian uint32s
+		b = StrMid(g, 9, 8);
+		c = NQH_ReverseBytes(StrMid(g, 18, 8));
+		d = NQH_ReverseBytes(StrMid(g, 27, 8));
+		return StrLeft(g, 8) + "-" + StrRight(b, 4) + "-" + StrLeft(b, 4) + "-" + StrLeft(c, 4) + "-" + StrRight(c, 4) + d;
+	}
+	if (StrLen(g) == 32 && StrFindFirst(g, "-") < 0)
+	{
+		return StrLeft(g, 8) + "-" + StrMid(g, 8, 4) + "-" + StrMid(g, 12, 4) + "-" + StrMid(g, 16, 4) + "-" + StrRight(g, 12);
+	}
+	return g;
+}
+
+// Eight hex digits with their four bytes in the other order
+function NQH_ReverseBytes(hex : string) : string
+{
+	return StrMid(hex, 6, 2) + StrMid(hex, 4, 2) + StrMid(hex, 2, 2) + StrMid(hex, 0, 2);
 }
 
 //---------------------------------------------------

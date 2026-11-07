@@ -42,6 +42,14 @@ Your mod needs no .asi or C++ of its own: only `modNativeQuestHook` installed be
 
 Decode the phase with [W3 Mod Workbench](https://github.com/Faen668/W3ModWorkbench) (`--to-json`) and look for the block's `guid`. Or set `LogEveryBlock=1` (see Debugging) and play the quest.
 
+`watched` takes a GUID in any of the forms you'll find it in, in upper or lower case:
+
+- the standard form, as W3 Mod Workbench and the log show it: `4b435b43-30c2-40d8-9eae-08df8d1b7df9`;
+- REDkit's, as its property grid shows it: `4B435B43-40D830C2-DF08AE9E-F97D1B8D`;
+- either in braces, or the standard form's 32 digits without dashes.
+
+They all name the same block. Your callbacks get the GUID back exactly as you wrote it in `watched`, and `NQH_NormaliseGuid(guid)` turns any of them into the standard form.
+
 **2. Write a listener.**
 
 ```witcherscript
@@ -95,6 +103,7 @@ A complete example is in [`examples/modNQHExample`](examples/modNQHExample).
 | `NQH_Register(id, listener)` | Registers a listener, or replaces the one with that id |
 | `NQH_Changed()` | Call after changing a registered listener's `watched` |
 | `NQH_IsBlockActive(guid)` | Whether a watched block is running now |
+| `NQH_NormaliseGuid(guid)` | A GUID in any accepted form, as the standard lower-case form |
 | `NQH_IsNativeActive()` | Whether `NativeQuestHook.asi` is installed and working |
 | `NQH_ApiVersion()` | The script API's version, 1 for now |
 
